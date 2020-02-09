@@ -12,7 +12,6 @@ import os
 import shutil
 import requests
 from io import open
-
 import pandas as pd
 
 with open('./api_key.txt', 'r') as f:
