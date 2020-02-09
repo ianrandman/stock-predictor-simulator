@@ -1,13 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
-import Routes from './routes'; // where we are going to specify our routes
 import * as serviceWorker from './serviceWorker';
+import App from './App';
 
 ReactDOM.render(
-  <Router>
-    <Routes />
-  </Router>,
+  <App/>,
   document.getElementById('root'),
 );
 

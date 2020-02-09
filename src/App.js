@@ -1,17 +1,19 @@
 import React from 'react';
-import './App.css';
-import Routes from '../routes';
+import Routes from './routes';
 import {BrowserRouter} from "react-router-dom";
+import 'typeface-roboto';
 
-function App() {
-  return (
-    <div className="application">
-      <h1>I am a header</h1>
-      <hr/>
+class App extends React.Component {
 
-      <Routes/>
-    </div>
-  );
+  render() {
+    return (
+      <div className="application">
+        <BrowserRouter>
+          <Routes/>
+        </BrowserRouter>
+      </div>
+    );
+  }
 }
 
 export default App;
