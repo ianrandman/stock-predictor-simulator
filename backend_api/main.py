@@ -1,10 +1,20 @@
 from flask import Flask
 from flask import request
 import datetime
-import json
+import os
 app = Flask(__name__)
 
-supported_stocks = ['ETH']
+
+def get_supported_stocks():
+    supported_stocks = []
+    DATA_PATH = os.path.dirname(os.path.abspath(__file__)) + '/../AI/data/'
+    candle_data_path = DATA_PATH + 'crypto_candles/'
+    for file_name in os.listdir(candle_data_path):
+        supported_stocks.append(file_name[:-len('USDT.csv')])
+    return supported_stocks
+
+
+supported_stocks = get_supported_stocks()
 
 
 def predict(stock, date=datetime.datetime.now(datetime.timezone.utc)):
