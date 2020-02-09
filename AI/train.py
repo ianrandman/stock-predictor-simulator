@@ -8,7 +8,7 @@ from io import open
 import pandas as pd
 
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, CuDNNLSTM
 from keras.layers import LSTM
 from keras.layers import Dropout
 
@@ -56,7 +56,7 @@ def build_candle_features_and_targets(crypto_candles_list, resolution=MINUTES_IN
             start = crypto_candles_list[i].iloc[int(j - MINUTES_IN_DAY / resolution), 0]  # close of day before
             end = crypto_candles_list[i].iloc[j, 0]  # close of day
 
-            percent_change = (end - start) / start
+            percent_change = 100 * (end - start) / start
             targets.append(percent_change)
 
     features_set, targets = np.array(features_set), np.array(targets)
@@ -66,16 +66,16 @@ def build_candle_features_and_targets(crypto_candles_list, resolution=MINUTES_IN
 
 def train(features_set, targets):
     model = Sequential()
-    model.add(LSTM(units=50, return_sequences=True, input_shape=(features_set.shape[1], features_set.shape[2])))
+    model.add(CuDNNLSTM(units=50, return_sequences=True, input_shape=(features_set.shape[1], features_set.shape[2])))
     model.add(Dropout(0.2))
 
-    model.add(LSTM(units=50, return_sequences=True))
+    model.add(CuDNNLSTM(units=50, return_sequences=True))
     model.add(Dropout(0.2))
 
-    model.add(LSTM(units=50, return_sequences=True))
+    model.add(CuDNNLSTM(units=50, return_sequences=True))
     model.add(Dropout(0.2))
 
-    model.add(LSTM(units=50))
+    model.add(CuDNNLSTM(units=50))
     model.add(Dropout(0.2))
 
     model.add(Dense(units=1))
