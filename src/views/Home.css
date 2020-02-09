@@ -1,12 +1,4 @@
-.home{
-    display: flex;
-    flex-direction: column;
-}
 
-.name{
-    display: flex;
-
-}
 
 .candleStickContainer{
     padding: 8px 20px 8px 20px;

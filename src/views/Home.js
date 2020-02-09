@@ -32,17 +32,31 @@ class Home extends React.Component {
   }
 
   gotPrediction = (prediction)=>{
-    console.log(JSON.parse(prediction));
-    this.setState({change:JSON.parse(prediction).percentChange});
+    try{
+      this.setState({change:JSON.parse(prediction).percentChange});
+    }catch (e) {
+      console.log(prediction);
+      console.log(e);
+    }
   };
 
   gotData = (data)=>{
-    this.setState({
-      data:JSON.parse(data)
-    });
+    try{
+      this.setState({
+        data:JSON.parse(data)
+      });
+    }catch (e) {
+      console.log(data);
+      console.log(e);
+    }
+
   };
   onError = (err)=>{
     console.error(err);
+  };
+
+  updateName = (name)=>{
+    this.setState(name);
   };
 
   render() {
@@ -62,9 +76,10 @@ class Home extends React.Component {
     let loading = (!change || !data)?<CircularProgress />:null;
     return (
       <div className='home'>
-        <NavBar pageName='Home'/>
+        <NavBar pageName='Home' updateName={this.updateName}/>
         <div className='name'>
-          <Typography variant='h1'>{this.state.name}{!loading && change}</Typography>
+          <Typography variant='h1'>{this.state.name}</Typography>
+          {!loading && change}
         </div>
         {!loading && data}
         {loading}

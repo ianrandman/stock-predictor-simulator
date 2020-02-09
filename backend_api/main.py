@@ -2,19 +2,72 @@ from flask import Flask
 from flask import request
 import datetime
 import os
+
+# If `entrypoint` is not defined in app.yaml, App Engine will look for an app
+# called `app` in `main.py`.
 app = Flask(__name__)
 
 
-def get_supported_stocks():
-    supported_stocks = []
-    DATA_PATH = os.path.dirname(os.path.abspath(__file__)) + '/../AI/data/'
-    candle_data_path = DATA_PATH + 'crypto_candles/'
-    for file_name in os.listdir(candle_data_path):
-        supported_stocks.append(file_name[:-len('USDT.csv')])
-    return supported_stocks
-
-
-supported_stocks = get_supported_stocks()
+supported_stocks = [
+       "ADA",
+       "ALGO",
+       "ANKR",
+       "ATOM",
+       "BAT",
+       "BCHABC",
+       "BCHSV",
+       "BNB",
+       "BTC",
+       "BTT",
+       "CELR",
+       "COCOS",
+       "COS",
+       "DASH",
+       "DOGE",
+       "DUSK",
+       "ENJ",
+       "EOS",
+       "ERD",
+       "ETC",
+       "ETH",
+       "FET",
+       "FTM",
+       "GTO",
+       "HOT",
+       "ICX",
+       "IOST",
+       "IOTA",
+       "LINK",
+       "LTC",
+       "MATIC",
+       "MITH",
+       "NANO",
+       "NEO",
+       "NPXS",
+       "NULS",
+       "OMG",
+       "ONE",
+       "ONG",
+       "ONT",
+       "PAX",
+       "QTUM",
+       "TFUEL",
+       "THETA",
+       "TRX",
+       "TUSD",
+       "USDC",
+       "USDSB",
+       "USDS",
+       "VET",
+       "WAVES",
+       "WIN",
+       "XLM",
+       "XMR",
+       "XRP",
+       "ZEC",
+       "ZIL",
+       "ZRX"
+     ]
 
 
 def predict(stock, date=datetime.datetime.now(datetime.timezone.utc)):
@@ -46,5 +99,5 @@ def list_route():
     return {"supportedStocks": supported_stocks}
 
 
-if __name__ == "__main__":
-    app.run()
+if __name__ == '__main__':
+    app.run(debug=True)
