@@ -1,3 +1,4 @@
+from keras import optimizers
 from sklearn.preprocessing import MinMaxScaler
 import random
 import numpy as np
@@ -65,22 +66,35 @@ def build_candle_features_and_targets(crypto_candles_list, resolution=MINUTES_IN
 
 
 def train(features_set, targets):
+    features_set = features_set[:17312]
+    targets = targets[:17312]
+
     model = Sequential()
-    model.add(CuDNNLSTM(units=50, return_sequences=True, input_shape=(features_set.shape[1], features_set.shape[2])))
-    model.add(Dropout(0.2))
 
-    model.add(CuDNNLSTM(units=50, return_sequences=True))
-    model.add(Dropout(0.2))
+    model.add(
+        CuDNNLSTM(100, batch_input_shape=(32, 9, features_set.shape[2]), dropout=0.0, recurrent_dropout=0.0,
+             stateful=True, kernel_initializer='random_uniform'))
+    model.add(Dropout(0.5))
+    model.add(Dense(20, activation='relu'))
+    model.add(Dense(1, activation='sigmoid'))
+    optimizer = optimizers.RMSprop(lr=0.001)
+    model.compile(loss='mean_squared_error', optimizer=optimizer)
 
-    model.add(CuDNNLSTM(units=50, return_sequences=True))
-    model.add(Dropout(0.2))
-
-    model.add(CuDNNLSTM(units=50))
-    model.add(Dropout(0.2))
-
-    model.add(Dense(units=1))
-
-    model.compile(optimizer='adam', loss='mean_squared_error')
+    # model.add(LSTM(units=50, return_sequences=True, input_shape=(features_set.shape[1], features_set.shape[2])))
+    # model.add(Dropout(0.2))
+    #
+    # model.add(LSTM(units=50, return_sequences=True))
+    # model.add(Dropout(0.2))
+    #
+    # model.add(LSTM(units=50, return_sequences=True))
+    # model.add(Dropout(0.2))
+    #
+    # model.add(LSTM(units=50))
+    # model.add(Dropout(0.2))
+    #
+    # model.add(Dense(units=1))
+    #
+    # model.compile(optimizer='adam', loss='mean_squared_error')
 
     model.fit(features_set, targets, epochs=100, batch_size=32)
 
