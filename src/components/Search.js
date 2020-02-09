@@ -3,6 +3,7 @@ import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import {InputBase} from "@material-ui/core";
+import {fade, makeStyles} from "@material-ui/core/styles";
 
 function sleep(delay = 0) {
   return new Promise(resolve => {
@@ -10,10 +11,29 @@ function sleep(delay = 0) {
   });
 }
 
+const useStyles = makeStyles(theme => ({
+  inputRoot: {
+    color: 'inherit',
+  },
+  inputInput: {
+    padding: theme.spacing(1, 1, 1, 7),
+    transition: theme.transitions.create('width'),
+    width: '100%',
+    [theme.breakpoints.up('sm')]: {
+      width: 120,
+      '&:focus': {
+        width: 200,
+      },
+    },
+  },
+}));
+
 export default function Search() {
   const [open, setOpen] = React.useState(false);
   const [options, setOptions] = React.useState([]);
   const loading = open && options.length === 0;
+
+  const classes = useStyles();
 
   React.useEffect(() => {
     let active = true;
@@ -54,19 +74,27 @@ export default function Search() {
       onClose={() => {
         setOpen(false);
       }}
+      classes={{
+        root: classes.inputRoot,
+        input: classes.inputInput,
+      }}
       getOptionSelected={(option, value) => option.name === value.name}
       getOptionLabel={option => option.name}
       options={options}
       loading={loading}
+      freeSolo
+      classes={{
+        root: classes.inputRoot,
+        input: classes.inputInput,
+      }}
       renderInput={params => (
-        <InputBase
+        <TextField
           {...params}
           label="Search"
-          fullWidth
           variant="outlined"
+          fullWidth
           InputProps={{
             ...params.InputProps,
-            'aria-label': 'search',
             endAdornment: (
               <React.Fragment>
                 {loading ? <CircularProgress color="inherit" size={20} /> : null}
@@ -79,13 +107,3 @@ export default function Search() {
     />
   );
 }
-
-{/*<InputBase*/}
-{/*  placeholder="Search…"*/}
-{/*  classes={{*/}
-{/*    root: classes.inputRoot,*/}
-{/*    input: classes.inputInput,*/}
-{/*  }}*/}
-{/*  inputProps={{ 'aria-label': 'search' }}*/}
-{/*  onChange={onSearchChange}*/}
-{/*/>*/}

@@ -83,13 +83,7 @@ export default function Navbar(props) {
           {props.pageName}
         </Typography>
         <div className={classes.search}>
-          <div className={classes.searchIcon}>
-            <SearchIcon />
-          </div>
-          <Search classes={{
-            root: classes.inputRoot,
-            input: classes.inputInput,
-          }}/>
+          <Search />
         </div>
       </Toolbar>
     </div>

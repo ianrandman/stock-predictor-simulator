@@ -68,7 +68,8 @@ class Home extends React.Component {
       <div className='home'>
         <NavBar pageName='Home' updateName={this.updateName}/>
         <div className='name'>
-          <Typography variant='h1'>{this.state.name}{!loading && change}</Typography>
+          <Typography variant='h1'>{this.state.name}</Typography>
+          {!loading && change}
         </div>
         {!loading && data}
         {loading}
