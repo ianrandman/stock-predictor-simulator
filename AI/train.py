@@ -15,7 +15,7 @@ from keras.layers import Dropout
 
 DATA_PATH = os.path.dirname(os.path.abspath(__file__)) + '/data/'
 MINUTES_IN_DAY = 1440
-NUM_DAYS_TO_TRAIN = 9
+NUM_DAYS_TO_TRAIN = 50
 
 
 def load_candles():
@@ -54,11 +54,18 @@ def build_candle_features_and_targets(crypto_candles_list, resolution=MINUTES_IN
             features_set.append(crypto_candles[j - int(NUM_DAYS_TO_TRAIN * MINUTES_IN_DAY / resolution):j])
 
             # Calculate % change for target
-            start = crypto_candles_list[i].iloc[int(j - MINUTES_IN_DAY / resolution), 0]  # close of day before
-            end = crypto_candles_list[i].iloc[j, 0]  # close of day
+            # start = crypto_candles_list[i].iloc[int(j - MINUTES_IN_DAY / resolution), 0]  # close of day before
+            # end = crypto_candles_list[i].iloc[j, 0]  # close of day
+            #
+            # percent_change = 100 * (end - start) / start
 
-            percent_change = 100 * (end - start) / start
-            targets.append(percent_change)
+            change = crypto_candles_list[i].iloc[j, 0] - crypto_candles_list[i].iloc[int(j - MINUTES_IN_DAY / resolution), 0]
+            if change <= 0:
+                targets.append(0)
+            else:
+                targets.append(1)
+
+            # targets.append(percent_change)
 
     features_set, targets = np.array(features_set), np.array(targets)
 
@@ -66,18 +73,18 @@ def build_candle_features_and_targets(crypto_candles_list, resolution=MINUTES_IN
 
 
 def train(features_set, targets):
-    features_set = features_set[:27680]
-    targets = targets[:27680]
+    features_set = features_set[:23872]
+    targets = targets[:23872]
 
     model = Sequential()
 
     model.add(
-        CuDNNLSTM(100, batch_input_shape=(32, 9, features_set.shape[2]),
+        LSTM(75, batch_input_shape=(32, NUM_DAYS_TO_TRAIN, features_set.shape[2]),
              stateful=True, kernel_initializer='random_uniform'))
     model.add(Dropout(0.5))
     model.add(Dense(20, activation='relu'))
-    model.add(Dense(1, activation='sigmoid'))
-    optimizer = optimizers.RMSprop(lr=0.001)
+    model.add(Dense(1, activation='relu'))
+    optimizer = optimizers.Adam(lr=0.0001)
     model.compile(loss='mean_squared_error', optimizer=optimizer)
 
     # model.add(LSTM(units=50, return_sequences=True, input_shape=(features_set.shape[1], features_set.shape[2])))
@@ -96,7 +103,9 @@ def train(features_set, targets):
     #
     # model.compile(optimizer='adam', loss='mean_squared_error')
 
-    model.fit(features_set, targets, epochs=100, batch_size=32)
+    model.fit(features_set, targets, epochs=3, batch_size=32)
+
+    print(model.evaluate(features_set, targets))
 
 
 def main():
