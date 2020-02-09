@@ -35,15 +35,15 @@ def predict_route():
             return "Bad request, Invalid stock", 400
         if request.args.get('date'):
             date = request.args.get('date')
-            return {"percent_change": predict(stock, date)}
-        return {"percent_change": predict(stock)}
+            return {"percentChange": predict(stock, date)}
+        return {"percentChange": predict(stock)}
     else:
         return "Bad request, Stock not provided", 400
 
 
 @app.route("/list")
 def list_route():
-    return {"supported_stocks": supported_stocks}
+    return {"supportedStocks": supported_stocks}
 
 
 if __name__ == "__main__":
