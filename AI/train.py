@@ -7,6 +7,11 @@ import requests
 from io import open
 import pandas as pd
 
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.layers import LSTM
+from keras.layers import Dropout
+
 DATA_PATH = os.path.dirname(os.path.abspath(__file__)) + '/data/'
 MINUTES_IN_DAY = 1440
 NUM_DAYS_TO_TRAIN = 9
@@ -40,13 +45,16 @@ def build_candle_features_and_targets(crypto_candles_list, resolution=MINUTES_IN
     features_set = list()
     targets = list()
 
-    for crypto_candles in crypto_candles_list[0:1]:
-        for i in range(int(NUM_DAYS_TO_TRAIN * MINUTES_IN_DAY / resolution), crypto_candles.shape[0]):
-            features_set.append(crypto_candles[i - int(NUM_DAYS_TO_TRAIN * MINUTES_IN_DAY / resolution):i])
+    crypto_candles_list_scaled = scale(crypto_candles_list)
+
+    for i in range(len(crypto_candles_list)):
+        crypto_candles = crypto_candles_list_scaled[i]
+        for j in range(int(NUM_DAYS_TO_TRAIN * MINUTES_IN_DAY / resolution), crypto_candles.shape[0]):
+            features_set.append(crypto_candles[j - int(NUM_DAYS_TO_TRAIN * MINUTES_IN_DAY / resolution):j])
 
             # Calculate % change for target
-            start = crypto_candles[int(i - MINUTES_IN_DAY / resolution)][0]  # close of day before
-            end = crypto_candles[i][0]  # close of day
+            start = crypto_candles_list[i].iloc[int(j - MINUTES_IN_DAY / resolution), 0]  # close of day before
+            end = crypto_candles_list[i].iloc[j, 0]  # close of day
 
             percent_change = (end - start) / start
             targets.append(percent_change)
@@ -56,10 +64,31 @@ def build_candle_features_and_targets(crypto_candles_list, resolution=MINUTES_IN
     return features_set, targets
 
 
+def train(features_set, targets):
+    model = Sequential()
+    model.add(LSTM(units=50, return_sequences=True, input_shape=(features_set.shape[1], features_set.shape[2])))
+    model.add(Dropout(0.2))
+
+    model.add(LSTM(units=50, return_sequences=True))
+    model.add(Dropout(0.2))
+
+    model.add(LSTM(units=50, return_sequences=True))
+    model.add(Dropout(0.2))
+
+    model.add(LSTM(units=50))
+    model.add(Dropout(0.2))
+
+    model.add(Dense(units=1))
+
+    model.compile(optimizer='adam', loss='mean_squared_error')
+
+    model.fit(features_set, targets, epochs=100, batch_size=32)
+
+
 def main():
     crypto_candles_list = load_candles()
-    crypto_candles_list_scaled = scale(crypto_candles_list)
-    build_candle_features_and_targets(crypto_candles_list_scaled)
+    features_set, targets = build_candle_features_and_targets(crypto_candles_list)
+    train(features_set, targets)
 
 
 if __name__ == '__main__':
