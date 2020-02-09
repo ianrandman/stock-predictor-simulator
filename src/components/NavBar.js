@@ -71,25 +71,11 @@ export default function Navbar(props) {
   return (
     <div className={classes.root}>
       <Toolbar>
-        <IconButton
-          edge="start"
-          className={classes.menuButton}
-          color="inherit"
-          aria-label="open drawer"
-        >
-          <MenuIcon />
-        </IconButton>
         <Typography className={classes.title} variant="h6" noWrap>
           {props.pageName}
         </Typography>
         <div className={classes.search}>
-          <div className={classes.searchIcon}>
-            <SearchIcon />
-          </div>
-          <Search classes={{
-            root: classes.inputRoot,
-            input: classes.inputInput,
-          }}/>
+          <Search />
         </div>
       </Toolbar>
     </div>
