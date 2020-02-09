@@ -1,6 +1,9 @@
 from flask import Flask
 from flask import request
 import datetime
+from google.cloud import storage
+from dateutil.relativedelta import relativedelta
+import requests
 import os
 
 # If `entrypoint` is not defined in app.yaml, App Engine will look for an app
@@ -70,7 +73,11 @@ supported_stocks = [
      ]
 
 
-def predict(stock, date=datetime.datetime.now(datetime.timezone.utc)):
+def get_time():
+    return int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+
+
+def predict(stock, date=get_time()):
     """
     Consults trained model to get predicted percentage change for the provided stock
     TODO mock value for now, need to actually consult model
@@ -87,6 +94,7 @@ def predict_route():
         if stock not in supported_stocks:
             return "Bad request, Invalid stock", 400
         if request.args.get('date'):
+            # TODO year-month-day
             date = request.args.get('date')
             return {"percentChange": predict(stock, date)}
         return {"percentChange": predict(stock)}
@@ -97,6 +105,25 @@ def predict_route():
 @app.route("/list")
 def list_route():
     return {"supportedStocks": supported_stocks}
+
+
+@app.route("/data")
+def data_route():
+    # from today's date, 6 months back
+    if request.args.get('stock'):
+        stock = request.args.get('stock')
+        base_url = 'https://finnhub.io/api/v1/crypto/candle'
+        request_parameters = dict()
+        request_parameters['resolution'] = 'D'
+        request_parameters['token'] = 'bovgj2nrh5r90eafkcu0'
+        request_parameters['symbol'] = 'BINANCE:' + stock + 'USDT'
+        request_parameters['from'] = int(
+            datetime.datetime.fromordinal((datetime.date.today() - relativedelta(months=+6)).toordinal()).timestamp())
+        request_parameters['to'] = int(datetime.datetime.now(datetime.timezone.utc).timestamp())
+        r = requests.get(base_url, params=request_parameters)
+        return r.content
+    else:
+        return "Bad request, Stock not provided", 400
 
 
 if __name__ == '__main__':
