@@ -45,6 +45,10 @@ class Home extends React.Component {
     console.error(err);
   };
 
+  updateName = (name)=>{
+    this.setState(name);
+  };
+
   render() {
     let change = null;
     if(this.state.change){
@@ -62,7 +66,7 @@ class Home extends React.Component {
     let loading = (!change || !data)?<CircularProgress />:null;
     return (
       <div className='home'>
-        <NavBar pageName='Home'/>
+        <NavBar pageName='Home' updateName={this.updateName}/>
         <div className='name'>
           <Typography variant='h1'>{this.state.name}{!loading && change}</Typography>
         </div>

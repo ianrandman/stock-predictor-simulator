@@ -6,6 +6,8 @@ import InputBase from '@material-ui/core/InputBase';
 import { fade, makeStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Search from './Search';
 
 
 const useStyles = makeStyles(theme => ({
@@ -84,14 +86,10 @@ export default function Navbar(props) {
           <div className={classes.searchIcon}>
             <SearchIcon />
           </div>
-          <InputBase
-            placeholder="Search…"
-            classes={{
-              root: classes.inputRoot,
-              input: classes.inputInput,
-            }}
-            inputProps={{ 'aria-label': 'search' }}
-          />
+          <Search classes={{
+            root: classes.inputRoot,
+            input: classes.inputInput,
+          }}/>
         </div>
       </Toolbar>
     </div>
