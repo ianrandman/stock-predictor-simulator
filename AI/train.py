@@ -19,7 +19,7 @@ NUM_DAYS_TO_TRAIN = 9
 
 
 def load_candles():
-    candle_data_path = DATA_PATH + 'crypto_candles/'
+    candle_data_path = DATA_PATH + 'crypto_candles-more/'
     crypto_candles_list = list()
 
     if os.path.exists(candle_data_path):
@@ -72,7 +72,7 @@ def train(features_set, targets):
     model = Sequential()
 
     model.add(
-        CuDNNLSTM(100, batch_input_shape=(32, 9, features_set.shape[2]), dropout=0.0, recurrent_dropout=0.0,
+        LSTM(100, batch_input_shape=(32, 9, features_set.shape[2]),
              stateful=True, kernel_initializer='random_uniform'))
     model.add(Dropout(0.5))
     model.add(Dense(20, activation='relu'))
