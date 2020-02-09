@@ -3,6 +3,12 @@ import NavBar from "../components/NavBar";
 import Network from "../classes/Network";
 import CandleStick from "../components/CandleStick";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import './Home.css';
+import Paper from "@material-ui/core/Paper";
+import Grid from "@material-ui/core/Grid";
+import Typography from "@material-ui/core/Typography";
+import TrendingUpIcon from '@material-ui/icons/TrendingUp';
+import TrendingDownIcon from '@material-ui/icons/TrendingDown';
 
 class Home extends React.Component {
   constructor(props) {
@@ -27,6 +33,7 @@ class Home extends React.Component {
   }
 
   gotPrediction = (prediction)=>{
+    console.log(JSON.parse(prediction));
     this.setState({change:JSON.parse(prediction).percentChange});
   };
 
@@ -40,12 +47,20 @@ class Home extends React.Component {
   };
 
   render() {
+    let change = null;
+    if(this.state.change){
+      let icon = this.state.change>0?<TrendingUpIcon/>:<TrendingDownIcon/>;
+      change = <Typography variant='h1' className={'change '+((this.state.change>0)?'up':'down')}>Prediction: {this.state.change}% {icon}</Typography>
+    }
     return (
       <div className='home'>
         <NavBar pageName='Home'/>
-        <h1>{this.state.name}</h1>
-        {this.state.data?<CandleStick className='candleStick' data={this.state.data}/>:<CircularProgress />}
-        {this.state.change?<h2>{this.state.change}</h2>:<div/>}
+        <Typography variant='h1'>{this.state.name}{change}</Typography>
+        <Paper className='candleStick'>
+          <div className='candleStickContainer'>
+            {this.state.data?<CandleStick data={this.state.data}/>:<CircularProgress />}
+          </div>
+        </Paper>
       </div>
     );
   };

@@ -4,5 +4,21 @@
 }
 
 .candleStick{
-    flex-shrink: 1;
+
+}
+
+.candleStickContainer{
+    padding: 8px 20px 8px 20px;
+}
+
+.change{
+
+}
+
+.up{
+    color:green;
+}
+
+.down{
+    color:red;
 }

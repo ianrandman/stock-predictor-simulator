@@ -1,6 +1,7 @@
 import React from 'react';
-import Routes from './Routes';
+import Routes from './routes';
 import {BrowserRouter} from "react-router-dom";
+import 'typeface-roboto';
 
 class App extends React.Component {
 
