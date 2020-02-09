@@ -1,0 +1,8 @@
+.home{
+    display: flex;
+    flex-direction: column;
+}
+
+.candleStick{
+    flex-shrink: 1;
+}
