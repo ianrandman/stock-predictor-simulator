@@ -66,8 +66,8 @@ def build_candle_features_and_targets(crypto_candles_list, resolution=MINUTES_IN
 
 
 def train(features_set, targets):
-    features_set = features_set[:27860]
-    targets = targets[:27860]
+    features_set = features_set[:27680]
+    targets = targets[:27680]
 
     model = Sequential()
 
