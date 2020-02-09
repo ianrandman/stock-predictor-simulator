@@ -4,6 +4,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import {InputBase} from "@material-ui/core";
 import {fade, makeStyles} from "@material-ui/core/styles";
+import Network from "../classes/Network";
 
 function sleep(delay = 0) {
   return new Promise(resolve => {
@@ -43,12 +44,14 @@ export default function Search() {
     }
 
     (async () => {
-      const response = await fetch('https://country.register.gov.uk/records.json?page-size=5000');
-      await sleep(1e3); // For demo purposes.
-      const countries = await response.json();
+      const text = await Network.getOptions();
+      //const response = await fetch('https://country.register.gov.uk/records.json?page-size=5000');
+      //await sleep(1e3); // For demo purposes.
+      //const countries = await response.json();
+      const list = await text.json();
 
       if (active) {
-        setOptions(Object.keys(countries).map(key => countries[key].item[0]));
+        setOptions(list);
       }
     })();
 
@@ -65,7 +68,7 @@ export default function Search() {
 
   return (
     <Autocomplete
-      id="asynchronous-demo"
+      id="asynchronous"
       style={{ width: 300 }}
       open={open}
       onOpen={() => {
@@ -78,8 +81,8 @@ export default function Search() {
         root: classes.inputRoot,
         input: classes.inputInput,
       }}
-      getOptionSelected={(option, value) => option.name === value.name}
-      getOptionLabel={option => option.name}
+      getOptionSelected={(option, value) => option === value}
+      getOptionLabel={option => option}
       options={options}
       loading={loading}
       freeSolo
