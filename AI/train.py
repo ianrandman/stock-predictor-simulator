@@ -66,13 +66,13 @@ def build_candle_features_and_targets(crypto_candles_list, resolution=MINUTES_IN
 
 
 def train(features_set, targets):
-    features_set = features_set[:17312]
-    targets = targets[:17312]
+    features_set = features_set[:27860]
+    targets = targets[:27860]
 
     model = Sequential()
 
     model.add(
-        LSTM(100, batch_input_shape=(32, 9, features_set.shape[2]),
+        CuDNNLSTM(100, batch_input_shape=(32, 9, features_set.shape[2]),
              stateful=True, kernel_initializer='random_uniform'))
     model.add(Dropout(0.5))
     model.add(Dense(20, activation='relu'))
