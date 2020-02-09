@@ -5,6 +5,7 @@
 /.pnp
 .pnp.js
 AI/api_key.txt
+AI/new_api_key.txt
 
 # testing
 /coverage
