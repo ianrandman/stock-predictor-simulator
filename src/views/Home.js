@@ -5,7 +5,6 @@ import CandleStick from "../components/CandleStick";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import './Home.css';
 import Paper from "@material-ui/core/Paper";
-import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import TrendingDownIcon from '@material-ui/icons/TrendingDown';
@@ -49,18 +48,24 @@ class Home extends React.Component {
   render() {
     let change = null;
     if(this.state.change){
-      let icon = this.state.change>0?<TrendingUpIcon/>:<TrendingDownIcon/>;
-      change = <Typography variant='h1' className={'change '+((this.state.change>0)?'up':'down')}>Prediction: {this.state.change}% {icon}</Typography>
+      let icon = this.state.change>0?<TrendingUpIcon fontSize='inherit'/>:<TrendingDownIcon fontSize='inherit'/>;
+      change = <Typography variant='h3' className={'change '+((this.state.change>0)?'up':'down')}>Prediction: {this.state.change*100}% {icon}</Typography>
     }
+    let data = null;
+    if(this.state.data){
+      data = (<Paper className='candleStick'>
+        <div className='candleStickContainer'>
+          <CandleStick data={this.state.data}/>
+        </div>
+      </Paper>);
+    }
+    let loading = (!change || !data)?<CircularProgress />:null;
     return (
       <div className='home'>
         <NavBar pageName='Home'/>
-        <Typography variant='h1'>{this.state.name}{change}</Typography>
-        <Paper className='candleStick'>
-          <div className='candleStickContainer'>
-            {this.state.data?<CandleStick data={this.state.data}/>:<CircularProgress />}
-          </div>
-        </Paper>
+        <Typography variant='h1'>{this.state.name}{!loading && change}</Typography>
+        {!loading && data}
+        {loading}
       </div>
     );
   };
