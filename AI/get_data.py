@@ -7,6 +7,8 @@ __author__ = David Dunlap
 
 import random
 import threading
+from time import sleep
+
 import numpy as np
 import os
 import shutil
@@ -56,7 +58,7 @@ def get_symbols():
 
 
 def get_candles(symbols):
-    candle_data_path = DATA_PATH + 'crypto_candles/'
+    candle_data_path = DATA_PATH + 'crypto_candles-more/'
     crypto_candles = list()
 
     if os.path.exists(candle_data_path):
@@ -72,25 +74,46 @@ def get_candles(symbols):
         request_parameters = dict()
         # request_parameters['format'] = 'csv'
         request_parameters['resolution'] = 'D'
-        request_parameters['from'] = '1549584000'  # 02/08/2019 @ 12:00am (UTC)
-        request_parameters['to'] = '1581120000'  # 02/08/2020 @ 12:00am (UTC)
+        # request_parameters['from'] = '1420070400'  # 01/01/2015 @ 12:00am (UTC)
+        # request_parameters['to'] = '1581221249856'  # 02/08/2020 @ 12:00am (UTC)
         request_parameters['token'] = api_key
 
         for index, row in symbols.iterrows():
             market = row['markets']
             symbol = row['symbols']
 
-            request_parameters['symbol'] = symbol
-            r = requests.get(base_url, params=request_parameters)
+            # if market != 'ETHUSDT':
+            #     continue
 
-            try:
-                if r.json()['s'] == 'no_data':
+            print(market)
+
+            request_parameters['symbol'] = symbol
+            candles = pd.DataFrame()
+
+            dates = pd.date_range(start='1/1/2015', end='2/08/2020', periods=5)
+
+            for i in range(1, len(dates)):
+                print('From: ' + str(int(dates[i-1].value / 1000000000)))
+                print('To: ' + str(int(dates[i].value / 1000000000)))
+                print()
+
+                request_parameters['from'] = str(int(dates[i-1].value / 1000000000))
+                request_parameters['to'] = str(int(dates[i].value / 1000000000))
+                r = requests.get(base_url, params=request_parameters)
+                while r.status_code != 200:
+                    print('Waiting (API limit may be reached)...')
+                    sleep(5)
+                    r = requests.get(base_url, params=request_parameters)
+
+                try:
+                    if r.json()['s'] == 'no_data':
+                        continue
+
+                except ValueError:
                     continue
 
-            except ValueError:
-                continue
+                candles = candles.append(pd.DataFrame.from_dict(r.json()))
 
-            candles = pd.DataFrame.from_dict(r.json())
             candles.drop('s', axis=1, inplace=True)
             candles.to_csv(candle_data_path + market + '.csv')
             crypto_candles.append(candles)
