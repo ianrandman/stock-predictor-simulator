@@ -15,51 +15,51 @@ from keras.layers import Dropout
 
 DATA_PATH = os.path.dirname(os.path.abspath(__file__)) + '/data/'
 MINUTES_IN_DAY = 1440
-NUM_DAYS_TO_TRAIN = 50
+NUM_DAYS_TO_TRAIN = 9
 
 
 def load_candles():
-    candle_data_path = DATA_PATH + 'crypto_candles-more/'
-    crypto_candles_list = list()
+    candle_data_path = DATA_PATH + 'crypto_data_new_api/'
+    crypto_data_list = list()
 
     if os.path.exists(candle_data_path):
         for file_name in os.listdir(candle_data_path):
             df = pd.read_csv(candle_data_path + file_name, index_col=0)
-            crypto_candles_list.append(df)
+            crypto_data_list.append(df)
 
-    return crypto_candles_list
-
-
-def scale(crypto_candles_list):
-    scaler = MinMaxScaler(feature_range=(0, 1))
-
-    crypto_candles_list_scaled = list()
-    for crypto_candles in crypto_candles_list:
-        crypto_candles.drop('t', axis=1, inplace=True)
-        crypto_candles_scaled = scaler.fit_transform(crypto_candles)  # TODO all cryptos
-        crypto_candles_list_scaled.append(crypto_candles_scaled)
-
-    return crypto_candles_list_scaled
+    return crypto_data_list
 
 
-def build_candle_features_and_targets(crypto_candles_list, resolution=MINUTES_IN_DAY):
+def scale(crypto_data_list):
+    scaler = MinMaxScaler(feature_range=(0, 10))
+
+    crypto_data_list_scaled = list()
+    for crypto_data in crypto_data_list:
+        crypto_data.drop('dates', axis=1, inplace=True)
+        crypto_data_scaled = scaler.fit_transform(crypto_data)  # TODO all cryptos
+        crypto_data_list_scaled.append(crypto_data_scaled)
+
+    return crypto_data_list_scaled
+
+
+def build_candle_features_and_targets(crypto_data_list, resolution=MINUTES_IN_DAY):
     features_set = list()
     targets = list()
 
-    crypto_candles_list_scaled = scale(crypto_candles_list)
+    crypto_data_list_scaled = scale(crypto_data_list)
 
-    for i in range(len(crypto_candles_list)):
-        crypto_candles = crypto_candles_list_scaled[i]
-        for j in range(int(NUM_DAYS_TO_TRAIN * MINUTES_IN_DAY / resolution), crypto_candles.shape[0]):
-            features_set.append(crypto_candles[j - int(NUM_DAYS_TO_TRAIN * MINUTES_IN_DAY / resolution):j])
+    for i in range(len(crypto_data_list)):
+        crypto_data = crypto_data_list_scaled[i]
+        for j in range(int(NUM_DAYS_TO_TRAIN * MINUTES_IN_DAY / resolution), crypto_data.shape[0]):
+            features_set.append(crypto_data[j - int(NUM_DAYS_TO_TRAIN * MINUTES_IN_DAY / resolution):j])
 
             # Calculate % change for target
-            # start = crypto_candles_list[i].iloc[int(j - MINUTES_IN_DAY / resolution), 0]  # close of day before
-            # end = crypto_candles_list[i].iloc[j, 0]  # close of day
+            # start = crypto_data_list[i].iloc[int(j - MINUTES_IN_DAY / resolution), 0]  # close of day before
+            # end = crypto_data_list[i].iloc[j, 0]  # close of day
             #
             # percent_change = 100 * (end - start) / start
 
-            change = crypto_candles_list[i].iloc[j, 0] - crypto_candles_list[i].iloc[int(j - MINUTES_IN_DAY / resolution), 0]
+            change = crypto_data_list[i].iloc[j, 0] - crypto_data_list[i].iloc[int(j - MINUTES_IN_DAY / resolution), 0]
             if change <= 0:
                 targets.append(0)
             else:
@@ -73,18 +73,23 @@ def build_candle_features_and_targets(crypto_candles_list, resolution=MINUTES_IN
 
 
 def train(features_set, targets):
-    features_set = features_set[:23872]
-    targets = targets[:23872]
+    features_set_train = features_set[:1280]
+    targets_train = targets[:1280]
 
     model = Sequential()
 
     model.add(
-        LSTM(75, batch_input_shape=(32, NUM_DAYS_TO_TRAIN, features_set.shape[2]),
-             stateful=True, kernel_initializer='random_uniform'))
-    model.add(Dropout(0.5))
-    model.add(Dense(20, activation='relu'))
-    model.add(Dense(1, activation='relu'))
-    optimizer = optimizers.Adam(lr=0.0001)
+        LSTM(75, batch_input_shape=(16, NUM_DAYS_TO_TRAIN, features_set_train.shape[2]),
+             stateful=True, kernel_initializer='random_uniform', return_sequences=False))
+    model.add(Dropout(0.2))
+
+    # model.add(
+    #     LSTM(25, batch_input_shape=(16, NUM_DAYS_TO_TRAIN, features_set.shape[2]),
+    #          stateful=True, kernel_initializer='random_uniform'))
+    # model.add(Dropout(0.5))
+    model.add(Dense(25, activation='relu'))
+    model.add(Dense(1, activation='sigmoid'))
+    optimizer = optimizers.Adam(lr=0.001)
     model.compile(loss='mean_squared_error', optimizer=optimizer)
 
     # model.add(LSTM(units=50, return_sequences=True, input_shape=(features_set.shape[1], features_set.shape[2])))
@@ -103,14 +108,14 @@ def train(features_set, targets):
     #
     # model.compile(optimizer='adam', loss='mean_squared_error')
 
-    model.fit(features_set, targets, epochs=3, batch_size=32)
+    model.fit(features_set_train, targets_train, epochs=100, batch_size=16)
 
-    print(model.evaluate(features_set, targets))
+    print(model.evaluate(features_set[1280:1728], targets[1280:1728], batch_size=16))
 
 
 def main():
-    crypto_candles_list = load_candles()
-    features_set, targets = build_candle_features_and_targets(crypto_candles_list)
+    crypto_data_list = load_candles()
+    features_set, targets = build_candle_features_and_targets(crypto_data_list)
     train(features_set, targets)
 
 

@@ -24,3 +24,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 /.idea
+
+# AI
+AI_v2/data
+AI_v2/logs
+AI_v2/results

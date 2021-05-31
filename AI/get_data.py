@@ -119,6 +119,68 @@ def get_candles(symbols):
             crypto_candles.append(candles)
 
 
+def get_candles_stock(symbols):
+    candle_data_path = DATA_PATH + 'stock_candles/'
+    crypto_candles = list()
+
+    if os.path.exists(candle_data_path):
+        pass
+        # for file_name in os.listdir(candle_data_path):
+        #     df = pd.read_csv(candle_data_path + file_name, index_col=0)
+        #     crypto_candles.append(df)
+    else:
+        os.makedirs(candle_data_path)
+
+        base_url = 'https://finnhub.io/api/v1/stock/candle'
+
+        request_parameters = dict()
+        # request_parameters['format'] = 'csv'
+        request_parameters['resolution'] = 'D'
+        # request_parameters['from'] = '1420070400'  # 01/01/2015 @ 12:00am (UTC)
+        # request_parameters['to'] = '1581221249856'  # 02/08/2020 @ 12:00am (UTC)
+        request_parameters['token'] = api_key
+
+        for index, row in symbols.iterrows():
+            market = row['markets']
+            symbol = row['symbols']
+
+            # if market != 'ETHUSDT':
+            #     continue
+
+            print(market)
+
+            request_parameters['symbol'] = symbol
+            candles = pd.DataFrame()
+
+            dates = pd.date_range(start='1/1/2015', end='2/08/2020', periods=5)
+
+            for i in range(1, len(dates)):
+                print('From: ' + str(int(dates[i-1].value / 1000000000)))
+                print('To: ' + str(int(dates[i].value / 1000000000)))
+                print()
+
+                request_parameters['from'] = str(int(dates[i-1].value / 1000000000))
+                request_parameters['to'] = str(int(dates[i].value / 1000000000))
+                r = requests.get(base_url, params=request_parameters)
+                while r.status_code != 200:
+                    print('Waiting (API limit may be reached)...')
+                    sleep(5)
+                    r = requests.get(base_url, params=request_parameters)
+
+                try:
+                    if r.json()['s'] == 'no_data':
+                        continue
+
+                except ValueError:
+                    continue
+
+                candles = candles.append(pd.DataFrame.from_dict(r.json()))
+
+            candles.drop('s', axis=1, inplace=True)
+            candles.to_csv(candle_data_path + market + '.csv')
+            crypto_candles.append(candles)
+
+
 def main():
     symbols = get_symbols()
     get_candles(symbols)

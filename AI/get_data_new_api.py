@@ -23,7 +23,7 @@ DATA_PATH = os.path.dirname(os.path.abspath(__file__)) + '/data/'
 
 
 def get_symbols():
-    return ['ETH']  # TODO add more
+    return ['ETH', 'BCH', 'LTC']  # TODO add more
 
 
 def get_candles(symbols):
@@ -90,14 +90,47 @@ def get_candles(symbols):
                 sleep(5)
                 r = requests.get(base_url, params=request_parameters)
 
-            smas = list()
+            smas_10 = list()
             for i in range(len(dates)):
                 date = dates[i]
 
                 if date in r.json()['Technical Analysis: SMA']:
-                    smas.append(float(r.json()['Technical Analysis: SMA'][date]['SMA']))
+                    smas_10.append(float(r.json()['Technical Analysis: SMA'][date]['SMA']))
                 else:
-                    smas.append(0.0)
+                    smas_10.append(0.0)
+
+
+            request_parameters['time_period'] = '20'
+            r = requests.get(base_url, params=request_parameters)
+            while r.status_code != 200 or 'Note' in r.json().keys():
+                print('Waiting (API limit may be reached)...')
+                sleep(5)
+                r = requests.get(base_url, params=request_parameters)
+
+            smas_20 = list()
+            for i in range(len(dates)):
+                date = dates[i]
+
+                if date in r.json()['Technical Analysis: SMA']:
+                    smas_20.append(float(r.json()['Technical Analysis: SMA'][date]['SMA']))
+                else:
+                    smas_20.append(0.0)
+
+            request_parameters['time_period'] = '30'
+            r = requests.get(base_url, params=request_parameters)
+            while r.status_code != 200 or 'Note' in r.json().keys():
+                print('Waiting (API limit may be reached)...')
+                sleep(5)
+                r = requests.get(base_url, params=request_parameters)
+
+            smas_30 = list()
+            for i in range(len(dates)):
+                date = dates[i]
+
+                if date in r.json()['Technical Analysis: SMA']:
+                    smas_30.append(float(r.json()['Technical Analysis: SMA'][date]['SMA']))
+                else:
+                    smas_30.append(0.0)
 
             data = dict()
             data['dates'] = dates
@@ -107,7 +140,9 @@ def get_candles(symbols):
             data['closes'] = closes
             data['volumes'] = volumes
             data['market_caps'] = market_caps
-            data['smas'] = smas
+            data['smas_10'] = smas_10
+            data['smas_20'] = smas_20
+            data['smas_30'] = smas_30
 
             ##############
 
@@ -170,7 +205,7 @@ def what():
 
     request_parameters = dict()
     request_parameters['format'] = 'csv'
-    request_parameters['resolution'] = 'D'
+    request_parameters['resolution'] = '60'
     request_parameters['from'] = '1549584000'  # 02/08/2019 @ 12:00am (UTC)
     request_parameters['to'] = '1581120000'  # 02/08/2020 @ 12:00am (UTC)
     request_parameters['symbol'] = 'BINANCE:BTCUSDT'
